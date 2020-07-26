@@ -9,10 +9,122 @@ const OUTPUT_DIR = path.resolve(__dirname, "output");
 const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
-console.log(inquirer);
+// const writeFileAsync = util.promisify(fs.writeFile);
+// const readFileAsync = util.promisify(fs.readFile);
+var teamArray = [];
+var employeeId = 0;
 
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
+function userPrompt(response) {
+  return inquirer
+    .prompt([
+      {
+        type: "list",
+        message: "What is your job?",
+        choices: ["Engineer", "Intern", "Manager"],
+        name: "job",
+      },
+    ])
+    .then(function (reply) {
+      if (reply.job === "Engineer") {
+        inquirer
+          .prompt([
+            {
+              type: "input",
+              message: "What is your name?",
+              name: "name",
+            },
+            {
+              type: "input",
+              message: "What is your github username?",
+              name: "github",
+            },
+            {
+              type: "input",
+              message: "What is your email address?",
+              name: "email",
+            },
+          ])
+          .then(function (engineerReply) {
+            var newEngineer = new Engineer(
+              engineerReply.name,
+              engineerReply.github,
+              engineerReply.email,
+              employeeId
+            );
+            employeeId = employeeId++;
+            teamArray.push(newEngineer);
+            newTeamMember();
+          });
+      } else if (reply.job === "Manager") {
+        inquirer
+          .prompt([
+            {
+              type: "input",
+              message: "What is your name?",
+              name: "name",
+            },
+            {
+              type: "input",
+              message: "What is your email address?",
+              name: "email",
+            },
+            {
+              type: "input",
+              message: "What is your office number?",
+              name: "office",
+            },
+          ])
+          .then(function (managerReply) {
+            var newManager = new Manager(
+              managerReply.name,
+              managerReply.email,
+              managerReply.office,
+              employeeId
+            );
+            employeeId = employeeId++;
+            teamArray.push(newManager);
+            newTeamMember();
+          });
+      } else if (reply.job === "Intern") {
+        inquirer
+          .prompt([
+            {
+              type: "input",
+              message: "What is your name?",
+              name: "name",
+            },
+            {
+              type: "input",
+              message: "What is your email address?",
+              name: "email",
+            },
+            {
+              type: "input",
+              message: "Where did you go to school?",
+              name: "school",
+            },
+          ])
+          .then(function (internReply) {
+            var newIntern = new Intern(
+              internReply.name,
+              internReply.email,
+              internReply.school,
+              employeeId
+            );
+            employeeId = employeeId++;
+            teamArray.push(newIntern);
+            newTeamMember();
+          });
+      }
+    })
+    .catch(function (err) {
+      console.log(err);
+    });
+}
+
+userPrompt();
 
 // After the user has input all employees desired, call the `render` function (required
 // above) and pass in an array containing all employee objects; the `render` function will
