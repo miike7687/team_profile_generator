@@ -1,18 +1,19 @@
-const Manager = require("./lib/Manager");
-const Engineer = require("./lib/Engineer");
-const Intern = require("./lib/Intern");
+const Manager = require("./lib/Manager.js");
+const Engineer = require("./lib/Engineer.js");
+const Intern = require("./lib/Intern.js");
 const inquirer = require("inquirer");
 const path = require("path");
 const fs = require("fs");
+const util = require("util");
 
 const OUTPUT_DIR = path.resolve(__dirname, "output");
 const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
-// const writeFileAsync = util.promisify(fs.writeFile);
+const writeFileAsync = util.promisify(fs.writeFile);
 // const readFileAsync = util.promisify(fs.readFile);
 var teamArray = [];
-var employeeId = 0;
+// var employeeId = 0;
 
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
@@ -21,13 +22,13 @@ function userPrompt(response) {
     .prompt([
       {
         type: "list",
-        message: "What is your job?",
+        message: "What is your role?",
         choices: ["Engineer", "Intern", "Manager"],
-        name: "job",
+        name: "role",
       },
     ])
     .then(function (reply) {
-      if (reply.job === "Engineer") {
+      if (reply.role === "Engineer") {
         inquirer
           .prompt([
             {
@@ -42,6 +43,11 @@ function userPrompt(response) {
             },
             {
               type: "input",
+              message: "What is your employee ID?",
+              name: "id",
+            },
+            {
+              type: "input",
               message: "What is your email address?",
               name: "email",
             },
@@ -49,15 +55,16 @@ function userPrompt(response) {
           .then(function (engineerReply) {
             var newEngineer = new Engineer(
               engineerReply.name,
-              engineerReply.github,
+              engineerReply.id,
               engineerReply.email,
-              employeeId
+              engineerReply.github
             );
-            employeeId = employeeId++;
+            console.log(newEngineer);
+            // employeeId = employeeId++;
             teamArray.push(newEngineer);
             newTeamMember();
           });
-      } else if (reply.job === "Manager") {
+      } else if (reply.role === "Manager") {
         inquirer
           .prompt([
             {
@@ -69,6 +76,11 @@ function userPrompt(response) {
               type: "input",
               message: "What is your email address?",
               name: "email",
+            },
+            {
+              type: "input",
+              message: "What is your employee id?",
+              name: "id",
             },
             {
               type: "input",
@@ -79,15 +91,16 @@ function userPrompt(response) {
           .then(function (managerReply) {
             var newManager = new Manager(
               managerReply.name,
+              managerReply.id,
               managerReply.email,
-              managerReply.office,
-              employeeId
+              managerReply.office
             );
-            employeeId = employeeId++;
+            console.log(newManager);
+            // employeeId = employeeId++;
             teamArray.push(newManager);
             newTeamMember();
           });
-      } else if (reply.job === "Intern") {
+      } else if (reply.role === "Intern") {
         inquirer
           .prompt([
             {
@@ -102,6 +115,11 @@ function userPrompt(response) {
             },
             {
               type: "input",
+              message: "What is your employee id?",
+              name: "id",
+            },
+            {
+              type: "input",
               message: "Where did you go to school?",
               name: "school",
             },
@@ -109,11 +127,11 @@ function userPrompt(response) {
           .then(function (internReply) {
             var newIntern = new Intern(
               internReply.name,
+              internReply.id,
               internReply.email,
-              internReply.school,
-              employeeId
+              internReply.school
             );
-            employeeId = employeeId++;
+            console.log(newIntern);
             teamArray.push(newIntern);
             newTeamMember();
           });
@@ -122,6 +140,35 @@ function userPrompt(response) {
     .catch(function (err) {
       console.log(err);
     });
+}
+
+function newTeamMember(reply) {
+  inquirer
+    .prompt([
+      {
+        type: "confirm",
+        message: "Do you want to add a new team member?",
+        name: "continue",
+      },
+    ])
+    .then(function (userConfirm) {
+      if (userConfirm.continue === true) {
+        userPrompt();
+      } else {
+        generateHtml();
+        // Render the HTML function here!
+      }
+    })
+    .catch(function (err) {
+      console.log(err);
+    });
+}
+
+function generateHtml() {
+  console.log(teamArray);
+  const newHtml = render(teamArray);
+  console.log(newHtml);
+  writeFileAsync("new.html", newHtml);
 }
 
 userPrompt();
