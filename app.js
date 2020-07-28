@@ -168,7 +168,7 @@ function generateHtml() {
   console.log(teamArray);
   const newHtml = render(teamArray);
   console.log(newHtml);
-  writeFileAsync("new.html", newHtml);
+  writeFileAsync(outputPath, newHtml);
 }
 
 userPrompt();
